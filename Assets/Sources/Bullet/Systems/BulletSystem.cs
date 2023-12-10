@@ -9,9 +9,10 @@ public partial class BulletSystem : SystemBase {
     protected override void OnUpdate() {
         EntityManager entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        foreach (var (bulletData, bulletTransform) in SystemAPI.Query<RefRO<BulletData>, RefRW<LocalTransform>>()) {
+        foreach (var (bulletData, bulletTransform, entity) in SystemAPI.Query<RefRO<BulletData>, RefRW<LocalTransform>>().WithEntityAccess()) {
 
-            bulletTransform.ValueRW.Position += bulletData.ValueRO.speed * bulletTransform.ValueRO.Right() * SystemAPI.Time.DeltaTime;
+            bulletTransform.ValueRW.Position += bulletData.ValueRO.speed * bulletTransform.ValueRO.Forward() * SystemAPI.Time.DeltaTime;
+            entityManager.SetComponentData<LocalTransform>(entity, bulletTransform.ValueRO);
         }
     }
 }

@@ -23,10 +23,5 @@ public class CharacterBaker : Baker<CharacterAuthoring> {
 
         //AddComponent(entity, new InputsData {
         //});
-
-        AddComponent(entity, new SpawnPoint {
-            Position = authoring.Position,
-            Rotation = authoring.Rotation
-        });
     }
 }

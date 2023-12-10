@@ -2,25 +2,35 @@ using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
 using Unity.Mathematics;
+using UnityEngine;
+using System;
 
 public partial class BotSpawnSystem : SystemBase {
 
-    //private GameObject _bot;
-
     protected override void OnCreate() {
-
-        //var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
-
-
+ 
     }
     protected override void OnUpdate() {
 
-        //foreach (var (botData, transformData) in SystemAPI.Query<BotData, RefRW<LocalTransform>>()) {
+        //var bot = Object.Instantiate(BotData)
 
-        //    EntityManager.Instantiate(botData.BotPrefab);
-        //    transformData.ValueRW.Position += 1; 
-        //}
+        foreach (var (botData, spawnPointData, botTransform, entity) in SystemAPI.Query<BotData, RefRW<BotSpawnPoint>, RefRW<LocalTransform>>()
+            .WithNone<IsBotHere>().WithEntityAccess()) {
 
+            //foreach (var (botData, spawnPointData)  in SystemAPI.Query<BotData, RefRW<BotSpawnPoint>>()) {
+
+            Unity.Mathematics.Random random = new Unity.Mathematics.Random();
+
+            spawnPointData.ValueRW.Position = new Vector3(random.NextInt(0, 9), 0, random.NextInt(10, 15));
+
+            //spawnPointData.ValueRW.Position = new Vector3(3, 2, 3);
+
+            botData.BotPrefab = UnityEngine.Object.Instantiate(botData.BotPrefab, spawnPointData.ValueRO.Position, spawnPointData.ValueRO.Rotation);
+
+            //EntityManager.AddComponent<IsBotHere>(entity);
+
+        }
+
+            
     }
-
 }

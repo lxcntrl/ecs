@@ -2,8 +2,10 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
+using Unity.VisualScripting;
 using UnityEditor.Build.Player;
 using UnityEngine;
+using UnityEngine.InputSystem.Processors;
 
 /*
 public partial struct CharacterMovementSystem : ISystem {
@@ -54,15 +56,32 @@ public partial class CharacterMovementSystem : SystemBase {
         //};
         }
     private void Move() {
-
+        
 
         var characterTransform = entityManager.GetComponentData<LocalTransform>(characterEntity);
 
-        characterTransform.Position += new float3(inputData.move * characterData.speed * SystemAPI.Time.DeltaTime, 0);
+        float moveX = inputData.move.x * characterData.speed * SystemAPI.Time.DeltaTime;
+        float moveZ= inputData.move.y * characterData.speed * SystemAPI.Time.DeltaTime;
 
-        Vector2 dir = (Vector2)inputData.mousePos - (Vector2)Camera.main.WorldToScreenPoint(characterTransform.Position);
-        float angle = math.degrees(math.atan2(dir.y, dir.x));
-        characterTransform.Rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+
+        //characterTransform.Position = direction;
+        float3 MoveDir = new float3(moveX, 0, moveZ);
+
+        characterTransform.Position += MoveDir;
+
+        //characterTransform.Rotation.value += math.radians(characterTransform.Rotation.value * SystemAPI.Time.DeltaTime);
+
+        //if (/*math.all(characterTransform.Position != float3.zero)*/) {
+            Quaternion toRotation = Quaternion.LookRotation(MoveDir, Vector3.up);
+            characterTransform.Rotation = Quaternion.RotateTowards(characterTransform.Rotation, toRotation, 10f);
+        //}
+        //Vector3 newDir = Vector3.RotateTowards(characterTransform, new Vector3 )
+
+
+        //Vector3 dir = (Vector2)inputData.mousePos - (Vector2)Camera.main.WorldToScreenPoint(characterTransform.Position);
+        //float angle = math.degrees(math.atan2(dir.z, dir.x));
+        //characterTransform.Rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
         entityManager.SetComponentData(characterEntity, characterTransform);
     }
@@ -70,21 +89,24 @@ public partial class CharacterMovementSystem : SystemBase {
 
     private float nextShootTime;
     private void Shoot() {
-        if (inputData.PressingLMB && nextShootTime < SystemAPI.Time.ElapsedTime) {
+        if (inputData.PressingLMB /*&& nextShootTime < SystemAPI.Time.ElapsedTime*/) {
             EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
 
             Entity bulletEntity = entityManager.Instantiate(characterData.BulletPrefab);
+            ecb.AddComponent(bulletEntity, new BulletData { speed = 10f });
 
             LocalTransform bulletTransform = entityManager.GetComponentData<LocalTransform>(bulletEntity);
             bulletTransform.Rotation = entityManager.GetComponentData<LocalTransform>(bulletEntity).Rotation;
             LocalTransform characterTransform = entityManager.GetComponentData<LocalTransform>(characterEntity);
-            bulletTransform.Position = characterTransform.Position + characterTransform.Right() + characterTransform.Up();
+            bulletTransform.Position = characterTransform.Position;
+            bulletTransform.Rotation = characterTransform.Rotation;
 
+            ecb.SetComponent(bulletEntity, bulletTransform);
             ecb.Playback(entityManager);
 
-            nextShootTime = (float)SystemAPI.Time.ElapsedTime + characterData.shootCooldown;
+            //EntityManager.AddComponentData(bulletEntity, new LocalTransform { });
 
-
+            nextShootTime = /*(float)SystemAPI.Time.ElapsedTime +*/ characterData.shootCooldown;
         }
 
     }
