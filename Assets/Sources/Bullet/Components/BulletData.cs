@@ -4,5 +4,5 @@ using Unity.Entities;
 using UnityEngine;
 
 public struct BulletData : IComponentData {
-    public float speed;
+    public float Speed;
 }

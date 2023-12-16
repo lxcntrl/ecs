@@ -15,8 +15,8 @@ public partial struct CharacterMovementSystem : ISystem {
         foreach (var (data, inputs, transform) in SystemAPI.Query<RefRO<CharacterData>, RefRO<InputsData>, RefRW<LocalTransform>>()) {
             float3 position = transform.ValueRO.Position;
 
-            position.x += inputs.ValueRO.move.x * data.ValueRO.speed * dt;
-            position.z += inputs.ValueRO.move.y * data.ValueRO.speed * dt;
+            position.x += inputs.ValueRO.move.x * data.ValueRO.Speed * dt;
+            position.z += inputs.ValueRO.move.y * data.ValueRO.Speed * dt;
             transform.ValueRW.Position = position;
         };
     }
@@ -37,31 +37,53 @@ public partial class CharacterMovementSystem : SystemBase {
     }
 
     protected override void OnUpdate() {
-        
-        characterEntity = SystemAPI.GetSingletonEntity<CharacterData>();
+
+
+
+        //foreach (var (characterEntity, characterData, characterTransform) 
+        //    in SystemAPI.Query<CharacterData, RefRW<LocalTransform>>().WithEntityAccess()) {
+
+        //    Move(characterEntity, characterData, LocalTransform characterTransform);
+
+        //}
+
+        //characterEntity = SystemAPI.GetSingletonEntity<CharacterData>();
         inputEntity = SystemAPI.GetSingletonEntity<InputsData>();
 
-        characterData = entityManager.GetComponentData<CharacterData>(characterEntity);
+        //characterData = entityManager.GetComponentData<CharacterData>(characterEntity);
         inputData = entityManager.GetComponentData<InputsData>(inputEntity);
 
-        Move();
-        Shoot();
+        //Entities.WithAll<CharacterData>().WithAll<RefRW<LocalTransform>>().
+        //    ForEach((Entity characterEntity, CharacterData characterData, LocalTransform characterTransform) => {
+        //    //Move(characterEntity, ref characterData, ref characterTransform);
 
-            //foreach (var (data, inputs, transform) in SystemAPI.Query<RefRO<CharacterData>, RefRO<InputsData>, RefRW<LocalTransform>>()) {
-            //    float3 position = transform.ValueRO.Position;
+        //    float moveX = inputData.move.x * characterData.Speed * SystemAPI.Time.DeltaTime;
+        //    float moveZ = inputData.move.y * characterData.Speed * SystemAPI.Time.DeltaTime;
 
-        //    position.x += inputs.ValueRO.move.x * data.ValueRO.speed * dt;
-        //    position.z += inputs.ValueRO.move.y * data.ValueRO.speed * dt;
-        //    transform.ValueRW.Position = position;
-        //};
-        }
-    private void Move() {
+        //    //characterTransform.Position = direction;
+        //    float3 MoveDir = new float3(moveX, 0, moveZ);
+
+        //    characterTransform.Position += MoveDir;
+        //}).WithoutBurst().Run();
+        //Shoot();
+
+        foreach (var (characterData, characterTransform, spawnPoint)
+            in SystemAPI.Query<CharacterData, RefRW<LocalTransform>, SpawnPoint>()) {
+
+            float3 position = characterTransform.ValueRO.Position;
+            position.x += 1;
+
+            int indexOfEntity = characterEntity.Index;
+
+            characterTransform.ValueRW.Position = position;
+
+        };
+    }
+    private void Move(Entity characterEntity, ref CharacterData characterData, ref LocalTransform characterTransform) {
         
 
-        var characterTransform = entityManager.GetComponentData<LocalTransform>(characterEntity);
-
-        float moveX = inputData.move.x * characterData.speed * SystemAPI.Time.DeltaTime;
-        float moveZ= inputData.move.y * characterData.speed * SystemAPI.Time.DeltaTime;
+        float moveX = inputData.move.x * characterData.Speed * SystemAPI.Time.DeltaTime;
+        float moveZ= inputData.move.y * characterData.Speed * SystemAPI.Time.DeltaTime;
 
 
 
@@ -74,7 +96,7 @@ public partial class CharacterMovementSystem : SystemBase {
 
         //if (/*math.all(characterTransform.Position != float3.zero)*/) {
             Quaternion toRotation = Quaternion.LookRotation(MoveDir, Vector3.up);
-            characterTransform.Rotation = Quaternion.RotateTowards(characterTransform.Rotation, toRotation, 10f);
+            characterTransform.Rotate(Quaternion.RotateTowards(characterTransform.Rotation, toRotation, 10f));
         //}
         //Vector3 newDir = Vector3.RotateTowards(characterTransform, new Vector3 )
 
@@ -92,8 +114,13 @@ public partial class CharacterMovementSystem : SystemBase {
         if (inputData.PressingLMB /*&& nextShootTime < SystemAPI.Time.ElapsedTime*/) {
             EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
 
-            Entity bulletEntity = entityManager.Instantiate(characterData.BulletPrefab);
-            ecb.AddComponent(bulletEntity, new BulletData { speed = 10f });
+            Entity bulletEntity = entityManager.CreateEntity();
+
+            Entities.WithAll<CharacterData>().ForEach((Entity bulletEntity, CharacterData characterData) => {
+                Object.Instantiate(characterData.BulletPrefab);
+            }).WithoutBurst().Run();
+
+            ecb.AddComponent(bulletEntity, new BulletData { Speed = 10f });
 
             LocalTransform bulletTransform = entityManager.GetComponentData<LocalTransform>(bulletEntity);
             bulletTransform.Rotation = entityManager.GetComponentData<LocalTransform>(bulletEntity).Rotation;
@@ -106,7 +133,7 @@ public partial class CharacterMovementSystem : SystemBase {
 
             //EntityManager.AddComponentData(bulletEntity, new LocalTransform { });
 
-            nextShootTime = /*(float)SystemAPI.Time.ElapsedTime +*/ characterData.shootCooldown;
+            nextShootTime = /*(float)SystemAPI.Time.ElapsedTime +*/ characterData.ShootCooldown;
         }
 
     }
