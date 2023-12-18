@@ -14,6 +14,10 @@ public class CharacterAuthoring : MonoBehaviour {
     public Animator Animator;
     public GameObject Character;
     //public CharacterAnimator CharacterAnimator;
+
+    private void Awake() {
+        Character = Resources.Load<GameObject>("Prefabs/Player");
+    }
 }
 
 //public class CharacterBaker : Baker<CharacterAuthoring> {

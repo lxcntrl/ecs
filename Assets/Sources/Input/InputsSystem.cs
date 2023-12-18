@@ -7,9 +7,9 @@ public partial class InputsSystem : SystemBase {
     private Controls inputs;
 
     protected override void OnCreate() {
-        if (!SystemAPI.TryGetSingleton<InputsData>(out InputsData data)) {
-            EntityManager.CreateEntity(typeof(InputsData));
-        }
+        //if (!SystemAPI.TryGetSingleton<InputsData>(out InputsData data)) {
+        //    EntityManager.CreateEntity(typeof(InputsData));
+        //}
 
         //var manager = World.DefaultGameObjectInjectionWor ld.EntityManager;
 
@@ -18,21 +18,21 @@ public partial class InputsSystem : SystemBase {
         inputs.Enable();
     }
     protected override void OnUpdate() {
-        Vector2 moveVector = inputs.Character.Move.ReadValue<Vector2>();
-        Vector2 mousePos = inputs.Character.MousePosition.ReadValue<Vector2>();
-        bool isPressingLMB = inputs.Character.Shoot.ReadValue<float>() == 1 ? true : false; //Если выбрать Shoot value, а не Button
-        //bool isPressingLMB = inputs.Character.Shoot.ReadValue<bool>();
+        //Vector2 moveVector = inputs.Character.Move.ReadValue<Vector2>();
+        //Vector2 mousePos = inputs.Character.MousePosition.ReadValue<Vector2>();
+        //bool isPressingLMB = inputs.Character.Shoot.ReadValue<float>() == 1 ? true : false; //Если выбрать Shoot value, а не Button
+        ////bool isPressingLMB = inputs.Character.Shoot.ReadValue<bool>();
 
-        SystemAPI.SetSingleton(new InputsData {
-            move = moveVector,
-            mousePos = mousePos,
-            PressingLMB = isPressingLMB
-        });
+        //SystemAPI.SetSingleton(new InputsData {
+        //    move = moveVector,
+        //    mousePos = mousePos,
+        //    PressingLMB = isPressingLMB
+        //});
 
 
-        //foreach (var/*RefRW<InputsData>*/ inputData in SystemAPI.Query<RefRW<InputsData>>()) {
-        //    inputData.ValueRW.move = inputs.Character.Move.ReadValue<Vector2>();
-
+        foreach (var inputData in SystemAPI.Query<RefRW<InputsData>>()) {
+            inputData.ValueRW.move = inputs.Character.Move.ReadValue<Vector2>();
+        }
         //    if (inputs.Character.Shoot.IsPressed()) {
         //        foreach (var (characterData, transformData) in SystemAPI.Query<RefRO<CharacterData>, RefRW<LocalTransform>>()) {
 

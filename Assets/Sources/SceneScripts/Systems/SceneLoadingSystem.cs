@@ -4,6 +4,7 @@ using Unity.Entities.Content;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 using Unity.Transforms;
+using UnityEngine.TextCore.Text;
 
 public partial class SceneLoadingSystem : SystemBase {
 
@@ -11,6 +12,7 @@ public partial class SceneLoadingSystem : SystemBase {
 
     protected override void OnCreate() {
         //manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        
     }
 
     protected override void OnUpdate() {
@@ -30,23 +32,18 @@ public partial class SceneLoadingSystem : SystemBase {
                 return;
             }
 
-            Entities.WithAll<CharacterData>().WithAll<SpawnPoint>().WithAll<LocalTransform>()
-                .ForEach((Entity entity, CharacterData characterData, SpawnPoint spawnPoint, LocalTransform localTransform) =>
-                {
-                    Object.Instantiate(characterData.Character, spawnPoint.Position, spawnPoint.Rotation);
-                    localTransform.Position += localTransform.Forward() * 3;
-            }).WithoutBurst().Run();
 
-            //ecb.AddComponent(entity, new SceneIsLoaded());
+            Entities.WithAll<CharacterData>().WithAll<SpawnPoint>().WithAll<LocalTransform>().WithAll<InputsData>()
+                .ForEach((Entity entity, CharacterData characterData, SpawnPoint spawnPoint, LocalTransform localTransform) => {
+                    
+                    if (characterData.Character != null) {
+                       
+                        var player = Object.Instantiate(characterData.Character, spawnPoint.Position, spawnPoint.Rotation);
+                        characterData.Character = player;
+                    }
+                }).WithoutBurst().WithStructuralChanges().Run();
             ecb.AddComponent<SceneIsLoaded>(entity);
-            //ecb.DestroyEntity(entity);
-
         }
-
-       
-
-
-
         ecb.Playback(EntityManager);
         ecb.Dispose();
     }

@@ -38,45 +38,20 @@ public partial class CharacterMovementSystem : SystemBase {
 
     protected override void OnUpdate() {
 
+        //inputEntity = SystemAPI.GetSingletonEntity<InputsData>();
+        //inputData = entityManager.GetComponentData<InputsData>(inputEntity);
 
-
-        //foreach (var (characterEntity, characterData, characterTransform) 
-        //    in SystemAPI.Query<CharacterData, RefRW<LocalTransform>>().WithEntityAccess()) {
-
-        //    Move(characterEntity, characterData, LocalTransform characterTransform);
-
-        //}
-
-        //characterEntity = SystemAPI.GetSingletonEntity<CharacterData>();
-        inputEntity = SystemAPI.GetSingletonEntity<InputsData>();
-
-        //characterData = entityManager.GetComponentData<CharacterData>(characterEntity);
-        inputData = entityManager.GetComponentData<InputsData>(inputEntity);
-
-        //Entities.WithAll<CharacterData>().WithAll<RefRW<LocalTransform>>().
-        //    ForEach((Entity characterEntity, CharacterData characterData, LocalTransform characterTransform) => {
-        //    //Move(characterEntity, ref characterData, ref characterTransform);
-
-        //    float moveX = inputData.move.x * characterData.Speed * SystemAPI.Time.DeltaTime;
-        //    float moveZ = inputData.move.y * characterData.Speed * SystemAPI.Time.DeltaTime;
-
-        //    //characterTransform.Position = direction;
-        //    float3 MoveDir = new float3(moveX, 0, moveZ);
-
-        //    characterTransform.Position += MoveDir;
-        //}).WithoutBurst().Run();
-        //Shoot();
-
-        foreach (var (characterData, characterTransform, spawnPoint)
-            in SystemAPI.Query<CharacterData, RefRW<LocalTransform>, SpawnPoint>()) {
+            foreach (var (characterData, characterTransform, spawnPoint, inputData, entity)
+            in SystemAPI.Query<CharacterData, RefRW<LocalTransform>, SpawnPoint, RefRW<InputsData>>().WithEntityAccess()) {
 
             float3 position = characterTransform.ValueRO.Position;
-            position.x += 1;
 
-            int indexOfEntity = characterEntity.Index;
+            float moveX = inputData.ValueRO.move.x * characterData.Speed * SystemAPI.Time.DeltaTime;
+            float moveZ = inputData.ValueRO.move.y * characterData.Speed * SystemAPI.Time.DeltaTime;
 
-            characterTransform.ValueRW.Position = position;
-
+            float3 newPosition = characterTransform.ValueRW.Position + new float3(moveX, 0f, moveZ);
+            characterTransform.ValueRW.Position = newPosition;
+            //characterTransform.ValueRW.Translate(new float3(moveX, 0f, moveZ));
         };
     }
     private void Move(Entity characterEntity, ref CharacterData characterData, ref LocalTransform characterTransform) {

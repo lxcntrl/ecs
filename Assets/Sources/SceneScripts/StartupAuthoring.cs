@@ -33,20 +33,21 @@ public sealed class StartupAuthoring : MonoBehaviour {
 
         var character = manager.CreateEntity();
         manager.AddComponentData(character, new CharacterData {
-            Character = _character,
-            Speed = _speed,
-            ShootCooldown = _shootCooldown,
-            BulletPrefab = _bulletPrefab
+        });
+
+        manager.AddComponentData(character, new CharacterAuthoring {
+            Character = _character
         });
         manager.AddComponentData(character, new SpawnPoint {
             Position = _position,
             Rotation = _rotation
         });
-
-       
-
+        manager.AddComponentData(character, new InputsData {
+        });
         manager.AddComponentData(character, new LocalTransform {
         });
+
+        
 
         var bot = manager.CreateEntity();
         manager.AddComponentData(bot, new BotData {
