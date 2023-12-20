@@ -1,64 +1,36 @@
-using System;
-using System.Diagnostics;
 using Unity.Entities;
 using Unity.Entities.Content;
-using Unity.Mathematics;
-using Unity.Transforms;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.UIElements;
+using Sources.Character;
 
-public sealed class StartupAuthoring : MonoBehaviour {
+namespace Sources.SceneScripts {
 
-    [SerializeField] private WeakObjectSceneReference _gameScene;
-    [SerializeField] private GameObject _character;
-    [SerializeField] private Vector3 _position;
-    [SerializeField] private Quaternion _rotation;
-    [SerializeField] private GameObject _botPrefab;
-    [SerializeField] private GameObject _bulletPrefab;
-    [SerializeField] private float _speed;
-    private float _shootCooldown;
+    public sealed class StartupAuthoring : MonoBehaviour {
 
-    private void Awake() {
-        _position = new Vector3(1, 1, 1);
-        _rotation = new Quaternion();
-        _rotation = Quaternion.Euler(1, 1, 1); 
+        [SerializeField] private WeakObjectSceneReference _gameScene;
+        [SerializeField] private GameObject _character;
 
-        var manager = World.DefaultGameObjectInjectionWorld.EntityManager;
+        private void Awake() {
+            EntityManager manager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
-        var scene = manager.CreateEntity();
-        manager.AddComponentData(scene, new LoadSceneData {
-            SceneReference = _gameScene
-        });
+            Entity scene = manager.CreateEntity();
+            manager.AddComponentData(scene, new LoadSceneData {
+                SceneReference = _gameScene
+            });
 
-        var character = manager.CreateEntity();
-        manager.AddComponentData(character, new CharacterData {
-        });
+            Entity inputs = manager.CreateEntity();
+            manager.AddComponentData(inputs, new InputsData {
+            });
 
-        manager.AddComponentData(character, new CharacterAuthoring {
-            Character = _character
-        });
-        manager.AddComponentData(character, new SpawnPoint {
-            Position = _position,
-            Rotation = _rotation
-        });
-        manager.AddComponentData(character, new InputsData {
-        });
-        manager.AddComponentData(character, new LocalTransform {
-        });
+            Entity character = manager.CreateEntity();
+            manager.AddComponentObject(character, new CharacterData {
+                Character = _character
+            });
 
-        
-
-        var bot = manager.CreateEntity();
-        manager.AddComponentData(bot, new BotData {
-            BotPrefab = _botPrefab
-        });
-        manager.AddComponentData(bot, new BotSpawnPoint {
-        });
-
-        manager.AddComponentData(bot, new RandomNumber {
-            Value = 10
-        });
-
+            manager.AddComponentData(character, new CharacterSpawnPoint {
+                Position = new Vector3(0, 0, 4),
+                Rotation = Quaternion.identity
+            });
+        }
     }
 }

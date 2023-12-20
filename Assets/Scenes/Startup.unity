@@ -306,11 +306,6 @@ MonoBehaviour:
     type: 3}
   _position: {x: 0, y: 0, z: 0}
   _rotation: {x: 0, y: 0, z: 0, w: 0}
-  _botPrefab: {fileID: 5969475564727141285, guid: 1a70b392ce387f44aa4f1434d6d697e5,
-    type: 3}
-  _bulletPrefab: {fileID: 1934757277005605562, guid: d73d2e617dcba2f41978ea4a5db5135a,
-    type: 3}
-  _speed: 10
 --- !u!4 &1580368386
 Transform:
   m_ObjectHideFlags: 0
